@@ -1,459 +1,397 @@
 <html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>
-        Telemedicine WebApp
-    </title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-    <style>
-        .hidden {
-            display: none;
-        }
-        .menu-enter {
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .menu-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .chatbot {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 300px;
-            max-height: 400px;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .chatbot-header {
-            background: #007bff;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .chatbot-messages {
-            flex: 1;
-            padding: 10px;
-            overflow-y: auto;
-        }
-        .chatbot-input {
-            display: flex;
-            border-top: 1px solid #ccc;
-        }
-        .chatbot-input input {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            outline: none;
-        }
-        .chatbot-input button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-        }
-    </style>
-    <script>
-        async function sendMessage() {
-            const input = document.getElementById('chatbot-input');
-            const message = input.value.trim();
-            if (message) {
-                const messagesContainer = document.getElementById('chatbot-messages');
-                const userMessage = document.createElement('div');
-                userMessage.className = 'text-right mb-2';
-                userMessage.innerHTML = `<span class="bg-blue-500 text-white px-4 py-2 rounded-lg inline-block">${message}</span>`;
-                messagesContainer.appendChild(userMessage);
-                input.value = '';
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Telemedicine WebApp
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+   .hidden {
+    display: none;
+   }
+   .menu-enter {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+   }
+   .menu-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+   }
+   .chatbot {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    max-height: 400px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+   }
+   .chatbot-header {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+   }
+   .chatbot-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+   }
+   .chatbot-input {
+    display: flex;
+    border-top: 1px solid #ccc;
+   }
+   .chatbot-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+   }
+   .chatbot-input button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+   }
+  </style>
+  <script>
+   const responses = {
+    "hello": "Hello! How can I assist you today?",
+    "hi": "Hi there! How can I help you?",
+    "how are you": "I'm just a bot, but I'm here to help you!",
+    "what is your name": "I'm the Doctor Chatbot, here to assist you with medical inquiries.",
+    "what can you do": "I can help you book appointments, provide information about our doctors, and answer general medical questions.",
+    "book appointment": "Sure, you can book an appointment by visiting the Appointments section.",
+    "who are the doctors": "We have Dr. John Doe (Cardiologist), Dr. Jane Smith (Dermatologist), and Dr. Emily Johnson (Neurologist).",
+    "nearest hospital": "You can find the nearest hospitals by using our 'Find Nearest Hospitals' feature.",
+    "symptoms": "Please describe your symptoms in detail, and I'll do my best to assist you.",
+    "default": "I'm sorry, I didn't understand that. Can you please rephrase?"
+   };
 
-                // Call the AI API
-                const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer YOUR_OPENAI_API_KEY'
-                    },
-                    body: JSON.stringify({
-                        prompt: `You are a doctor. Answer the following question: ${message}`,
-                        max_tokens: 150
-                    })
-                });
-                const data = await response.json();
-                const botMessage = document.createElement('div');
-                botMessage.className = 'text-left mb-2';
-                botMessage.innerHTML = `<span class="bg-gray-200 px-4 py-2 rounded-lg inline-block">${data.choices[0].text.trim()}</span>`;
-                messagesContainer.appendChild(botMessage);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        }
-    </script>
-</head>
-<body class="font-roboto bg-gray-100">
-<!-- Navbar -->
-<nav class="bg-blue-600 p-4 text-white">
-    <div class="container mx-auto flex justify-between items-center">
-        <a class="text-2xl font-bold" href="#">
-            Telemedicine
-        </a>
-        <button class="md:hidden" onclick="toggleMenu()">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="hidden md:flex md:items-center" id="menu">
-            <a class="px-4 py-2 block md:inline-block" href="#home">
-                Home
-            </a>
-            <a class="px-4 py-2 block md:inline-block" href="#doctors">
-                Doctors
-            </a>
-            <a class="px-4 py-2 block md:inline-block" href="#appointments">
-                Appointments
-            </a>
-            <a class="px-4 py-2 block md:inline-block" href="#contact">
-                Contact
-            </a>
-            <a class="px-4 py-2 block md:inline-block" href="#login">
-                Login
-            </a>
-            <a class="px-4 py-2 block md:inline-block" href="#signup">
-                Sign Up
-            </a>
-        </div>
-    </div>
-</nav>
-<!-- Hero Section -->
-<section class="bg-blue-500 text-white py-20" id="home">
-    <div class="container mx-auto text-center">
-        <h1 class="text-4xl font-bold mb-4">
-            Access Medical Specialists Remotely
-        </h1>
-        <p class="text-lg mb-8">
-            Book appointments and chat with doctors from the comfort of your home.
-        </p>
-        <a class="bg-white text-blue-500 px-6 py-3 rounded-full font-bold" href="#signup">
-            Get Started
-        </a>
-    </div>
-</section>
-<!-- Features Section -->
-<section class="py-20">
-    <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-12">
-            Our Features
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <img alt="Icon representing booking appointments" class="mx-auto mb-4" height="100" src="https://storage.googleapis.com/a1aa/image/VRcwQz_IVgWOnQoSDwZAvT_uZcSsfuOMt4rOQzi7HCU.jpg" width="100"/>
-                <h3 class="text-xl font-bold mb-2">
-                    Book Appointments
-                </h3>
-                <p>
-                    Schedule appointments with doctors easily and quickly.
-                </p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <img alt="Icon representing chat with doctors" class="mx-auto mb-4" height="100" src="https://storage.googleapis.com/a1aa/image/DjgrySH9m1JJMEb7Tcpv7XJlkCqkWLxdIuk5O5XJCSU.jpg" width="100"/>
-                <h3 class="text-xl font-bold mb-2">
-                    Chat with Doctors
-                </h3>
-                <p>
-                    Communicate with medical specialists through our chat feature.
-                </p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <img alt="Icon representing nearest hospitals" class="mx-auto mb-4" height="100" src="https://storage.googleapis.com/a1aa/image/8R10gSzfBR9I8QmLc6gAjJgwwHCe3e9oAYjbQuFvSCk.jpg" width="100"/>
-                <h3 class="text-xl font-bold mb-2">
-                    Find Nearest Hospitals
-                </h3>
-                <p>
-                    Locate the nearest hospitals or clinics around you.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Doctors Section -->
-<section class="bg-gray-200 py-20" id="doctors">
-    <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-12">
-            Our Doctors
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <img alt="Portrait of Dr. John Doe" class="mx-auto mb-4 rounded-full" height="150" src="https://storage.googleapis.com/a1aa/image/tAKcNSLcKyfkftv7fcl50a-LMYimlqP0cOEQXoUiMzI.jpg" width="150"/>
-                <h3 class="text-xl font-bold mb-2">
-                    Dr. John Doe
-                </h3>
-                <p>
-                    Cardiologist
-                </p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <img alt="Portrait of Dr. Jane Smith" class="mx-auto mb-4 rounded-full" height="150" src="https://storage.googleapis.com/a1aa/image/3wrUP93SkPnmwwA8bsE96rXHCUpM9UbQH1kvm7170MI.jpg" width="150"/>
-                <h3 class="text-xl font-bold mb-2">
-                    Dr. Jane Smith
-                </h3>
-                <p>
-                    Dermatologist
-                </p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <img alt="Portrait of Dr. Emily Johnson" class="mx-auto mb-4 rounded-full" height="150" src="https://storage.googleapis.com/a1aa/image/lASQupCvPql9oVrNjxJwpwqeJC8BaCFd3PB4AgWyIOE.jpg" width="150"/>
-                <h3 class="text-xl font-bold mb-2">
-                    Dr. Emily Johnson
-                </h3>
-                <p>
-                    Neurologist
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Appointments Section -->
-<section class="py-20" id="appointments">
-    <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-12">
-            Book an Appointment
-        </h2>
-        <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="doctor">
-                    Select Doctor
-                </label>
-                <select class="w-full p-2 border border-gray-300 rounded" id="doctor">
-                    <option>
-                        Dr. John Doe - Cardiologist
-                    </option>
-                    <option>
-                        Dr. Jane Smith - Dermatologist
-                    </option>
-                    <option>
-                        Dr. Emily Johnson - Neurologist
-                    </option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="date">
-                    Select Date
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="date" type="date"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="time">
-                    Select Time
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="time" type="time"/>
-            </div>
-            <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
-                Book Appointment
-            </button>
-        </form>
-    </div>
-</section>
-<!-- Contact Section -->
-<section class="bg-gray-200 py-20" id="contact">
-    <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-12">
-            Contact Us
-        </h2>
-        <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="contact-name">
-                    Name
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="contact-name" type="text"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="contact-email">
-                    Email
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="contact-email" type="email"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="message">
-                    Message
-                </label>
-                <textarea class="w-full p-2 border border-gray-300 rounded" id="message" rows="4">
-                </textarea>
-            </div>
-            <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
-                Send Message
-            </button>
-        </form>
-    </div>
-</section>
-<!-- Login Section -->
-<section class="py-20" id="login">
-    <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-12">
-            Login
-        </h2>
-        <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="login-email">
-                    Email
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="login-email" type="email"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="login-password">
-                    Password
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="login-password" type="password"/>
-            </div>
-            <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
-                Login
-            </button>
-        </form>
-    </div>
-</section>
-<!-- Sign Up Section -->
-<section class="py-20" id="signup">
-    <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-12">
-            Sign Up
-        </h2>
-        <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="signup-name">
-                    Name
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="signup-name" type="text"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="signup-email">
-                    Email
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="signup-email" type="email"/>
-            </div>
-            <div class="mb-4">
-                <label class="block text-left mb-2" for="signup-password">
-                    Password
-                </label>
-                <input class="w-full p-2 border border-gray-300 rounded" id="signup-password" type="password"/>
-            </div>
-            <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
-                Sign Up
-            </button>
-        </form>
-    </div>
-</section>
-<!-- Chatbot -->
-<div class="chatbot" id="chatbot">
-    <div class="chatbot-header">
-        Doctor Chatbot
-    </div>
-    <div class="chatbot-messages" id="chatbot-messages">
-    </div>
-    <div class="chatbot-input">
-        <input id="chatbot-input" placeholder="Type a message..." type="text"/>
-        <button onclick="sendMessage()">
-            Send
-        </button>
-    </div>
-</div>
-<section class="py-20" id="nearest-healthcare">
-    <div class="container mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-6">
-            Find the Nearest Hospital, Clinic, or Pharmacy
-        </h2>
-        <p class="mb-4 text-lg">Click the button below to detect the nearest healthcare facilities.</p>
-        <button onclick="getLocation()" class="bg-blue-500 text-white px-6 py-3 rounded-full font-bold">
-            Find Nearest Healthcare
-        </button>
-        <div id="map" class="mt-6 w-full h-96 rounded-lg shadow-lg"></div>
-    </div>
-</section>
-
-<script>
-    let map;
-    let service;
-    let infowindow;
-
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showMap, showError);
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
+   function toggleMenu() {
+    const menu = document.getElementById('menu');
+    if (menu.classList.contains('hidden')) {
+     menu.classList.remove('hidden');
+     menu.classList.add('menu-enter');
+     setTimeout(() => {
+      menu.classList.add('menu-enter-active');
+     }, 10);
+    } else {
+     menu.classList.remove('menu-enter-active');
+     setTimeout(() => {
+      menu.classList.add('hidden');
+      menu.classList.remove('menu-enter');
+     }, 300);
     }
+   }
 
-    function showMap(position) {
-        const userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+   function sendMessage() {
+    const input = document.getElementById('chatbot-input');
+    const message = input.value.trim().toLowerCase();
+    if (message) {
+     const messagesContainer = document.getElementById('chatbot-messages');
+     const userMessage = document.createElement('div');
+     userMessage.className = 'text-right mb-2';
+     userMessage.innerHTML = `<span class="bg-blue-500 text-white px-4 py-2 rounded-lg inline-block">${input.value}</span>`;
+     messagesContainer.appendChild(userMessage);
+     input.value = '';
+     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: userLocation,
-            zoom: 14,
-        });
-
-        const request = {
-            location: userLocation,
-            radius: "5000", // Search within 5km
-            type: ["hospital", "clinic", "pharmacy"], // Find hospitals, clinics, and pharmacies
-        };
-
-        service = new google.maps.places.PlacesService(map);
-        service.nearbySearch(request, handleResults);
+     setTimeout(() => {
+      const botMessage = document.createElement('div');
+      botMessage.className = 'text-left mb-2';
+      const response = responses[message] || responses["default"];
+      botMessage.innerHTML = `<span class="bg-gray-200 px-4 py-2 rounded-lg inline-block">${response}</span>`;
+      messagesContainer.appendChild(botMessage);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+     }, 1000);
     }
-
-    function handleResults(results, status) {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            results.forEach((place) => {
-                const marker = new google.maps.Marker({
-                    position: place.geometry.location,
-                    map: map,
-                    title: place.name,
-                });
-
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `<strong>${place.name}</strong><br>${place.vicinity}`,
-                });
-
-                marker.addListener("click", () => {
-                    infoWindow.open(map, marker);
-                });
-            });
-        }
-    }
-
-    function showError(error) {
-        switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert("User denied the request for Geolocation.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Location information is unavailable.");
-                break;
-            case error.TIMEOUT:
-                alert("The request to get user location timed out.");
-                break;
-            case error.UNKNOWN_ERROR:
-                alert("An unknown error occurred.");
-                break;
-        }
-    }
-</script>
-
-<!-- Google Maps API -->
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcGehL5tjw94n7ROGmsvadaR0Whss1uNQ&libraries=places"></script>
-
--->
-<footer class="bg-blue-600 text-white py-4">
-    <div class="container mx-auto text-center">
-        <p>
-            © 2023 Telemedicine. All rights reserved.
+   }
+  </script>
+ </head>
+ <body class="font-roboto bg-gray-100">
+  <!-- Navbar -->
+  <nav class="bg-blue-600 p-4 text-white">
+   <div class="container mx-auto flex justify-between items-center">
+    <a class="text-2xl font-bold" href="#">
+     Telemedicine
+    </a>
+    <button class="md:hidden" onclick="toggleMenu()">
+     <i class="fas fa-bars">
+     </i>
+    </button>
+    <div class="hidden md:flex md:items-center" id="menu">
+     <a class="px-4 py-2 block md:inline-block" href="#home">
+      Home
+     </a>
+     <a class="px-4 py-2 block md:inline-block" href="#doctors">
+      Doctors
+     </a>
+     <a class="px-4 py-2 block md:inline-block" href="#appointments">
+      Appointments
+     </a>
+     <a class="px-4 py-2 block md:inline-block" href="#contact">
+      Contact
+     </a>
+     <a class="px-4 py-2 block md:inline-block" href="#login">
+      Login
+     </a>
+     <a class="px-4 py-2 block md:inline-block" href="#signup">
+      Sign Up
+     </a>
     </div>
-</footer>
-</body>
+   </div>
+  </nav>
+  <!-- Hero Section -->
+  <section class="bg-blue-500 text-white py-20" id="home">
+   <div class="container mx-auto text-center">
+    <h1 class="text-4xl font-bold mb-4">
+     Access Medical Specialists Remotely
+    </h1>
+    <p class="text-lg mb-8">
+     Book appointments and chat with doctors from the comfort of your home.
+    </p>
+    <a class="bg-white text-blue-500 px-6 py-3 rounded-full font-bold" href="#signup">
+     Get Started
+    </a>
+   </div>
+  </section>
+  <!-- Features Section -->
+  <section class="py-20">
+   <div class="container mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-12">
+     Our Features
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+     <div class="bg-white p-6 rounded-lg shadow-lg">
+      <img alt="Icon representing booking appointments" class="mx-auto mb-4" height="100" src="https://storage.googleapis.com/a1aa/image/VRcwQz_IVgWOnQoSDwZAvT_uZcSsfuOMt4rOQzi7HCU.jpg" width="100"/>
+      <h3 class="text-xl font-bold mb-2">
+       Book Appointments
+      </h3>
+      <p>
+       Schedule appointments with doctors easily and quickly.
+      </p>
+     </div>
+     <div class="bg-white p-6 rounded-lg shadow-lg">
+      <img alt="Icon representing chat with doctors" class="mx-auto mb-4" height="100" src="https://storage.googleapis.com/a1aa/image/DjgrySH9m1JJMEb7Tcpv7XJlkCqkWLxdIuk5O5XJCSU.jpg" width="100"/>
+      <h3 class="text-xl font-bold mb-2">
+       Chat with Doctors
+      </h3>
+      <p>
+       Communicate with medical specialists through our chat feature.
+      </p>
+     </div>
+     <div class="bg-white p-6 rounded-lg shadow-lg">
+      <img alt="Icon representing nearest hospitals" class="mx-auto mb-4" height="100" src="https://storage.googleapis.com/a1aa/image/8R10gSzfBR9I8QmLc6gAjJgwwHCe3e9oAYjbQuFvSCk.jpg" width="100"/>
+      <h3 class="text-xl font-bold mb-2">
+       Find Nearest Hospitals
+      </h3>
+      <p>
+       Locate the nearest hospitals or clinics around you.
+      </p>
+     </div>
+    </div>
+   </div>
+  </section>
+  <!-- Doctors Section -->
+  <section class="bg-gray-200 py-20" id="doctors">
+   <div class="container mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-12">
+     Our Doctors
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+     <div class="bg-white p-6 rounded-lg shadow-lg">
+      <img alt="Portrait of Dr. John Doe" class="mx-auto mb-4 rounded-full" height="150" src="https://storage.googleapis.com/a1aa/image/tAKcNSLcKyfkftv7fcl50a-LMYimlqP0cOEQXoUiMzI.jpg" width="150"/>
+      <h3 class="text-xl font-bold mb-2">
+       Dr. John Doe
+      </h3>
+      <p>
+       Cardiologist
+      </p>
+     </div>
+     <div class="bg-white p-6 rounded-lg shadow-lg">
+      <img alt="Portrait of Dr. Jane Smith" class="mx-auto mb-4 rounded-full" height="150" src="https://storage.googleapis.com/a1aa/image/3wrUP93SkPnmwwA8bsE96rXHCUpM9UbQH1kvm7170MI.jpg" width="150"/>
+      <h3 class="text-xl font-bold mb-2">
+       Dr. Jane Smith
+      </h3>
+      <p>
+       Dermatologist
+      </p>
+     </div>
+     <div class="bg-white p-6 rounded-lg shadow-lg">
+      <img alt="Portrait of Dr. Emily Johnson" class="mx-auto mb-4 rounded-full" height="150" src="https://storage.googleapis.com/a1aa/image/lASQupCvPql9oVrNjxJwpwqeJC8BaCFd3PB4AgWyIOE.jpg" width="150"/>
+      <h3 class="text-xl font-bold mb-2">
+       Dr. Emily Johnson
+      </h3>
+      <p>
+       Neurologist
+      </p>
+     </div>
+    </div>
+   </div>
+  </section>
+  <!-- Appointments Section -->
+  <section class="py-20" id="appointments">
+   <div class="container mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-12">
+     Book an Appointment
+    </h2>
+    <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="doctor">
+       Select Doctor
+      </label>
+      <select class="w-full p-2 border border-gray-300 rounded" id="doctor">
+       <option>
+        Dr. John Doe - Cardiologist
+       </option>
+       <option>
+        Dr. Jane Smith - Dermatologist
+       </option>
+       <option>
+        Dr. Emily Johnson - Neurologist
+       </option>
+      </select>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="date">
+       Select Date
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="date" type="date"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="time">
+       Select Time
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="time" type="time"/>
+     </div>
+     <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
+      Book Appointment
+     </button>
+    </form>
+   </div>
+  </section>
+  <!-- Contact Section -->
+  <section class="bg-gray-200 py-20" id="contact">
+   <div class="container mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-12">
+     Contact Us
+    </h2>
+    <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="contact-name">
+       Name
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="contact-name" type="text"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="contact-email">
+       Email
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="contact-email" type="email"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="message">
+       Message
+      </label>
+      <textarea class="w-full p-2 border border-gray-300 rounded" id="message" rows="4">
+      </textarea>
+     </div>
+     <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
+      Send Message
+     </button>
+    </form>
+   </div>
+  </section>
+  <!-- Login Section -->
+  <section class="py-20" id="login">
+   <div class="container mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-12">
+     Login
+    </h2>
+    <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="login-email">
+       Email
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="login-email" type="email"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="login-password">
+       Password
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="login-password" type="password"/>
+     </div>
+     <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
+      Login
+     </button>
+    </form>
+   </div>
+  </section>
+  <!-- Sign Up Section -->
+  <section class="py-20" id="signup">
+   <div class="container mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-12">
+     Sign Up
+    </h2>
+    <form class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="signup-name">
+       Name
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="signup-name" type="text"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="signup-email">
+       Email
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="signup-email" type="email"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left mb-2" for="signup-password">
+       Password
+      </label>
+      <input class="w-full p-2 border border-gray-300 rounded" id="signup-password" type="password"/>
+     </div>
+     <button class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold" type="submit">
+      Sign Up
+     </button>
+    </form>
+   </div>
+  </section>
+  <!-- Chatbot -->
+  <div class="chatbot" id="chatbot">
+   <div class="chatbot-header">
+    Doctor Chatbot
+   </div>
+   <div class="chatbot-messages" id="chatbot-messages">
+   </div>
+   <div class="chatbot-input">
+    <input id="chatbot-input" placeholder="Type a message..." type="text"/>
+    <button onclick="sendMessage()">
+     Send
+    </button>
+   </div>
+  </div>
+  <!-- Footer -->
+  <footer class="bg-blue-600 text-white py-4">
+   <div class="container mx-auto text-center">
+    <p>
+     © 2023 Telemedicine. All rights reserved.
+    </p>
+   </div>
+  </footer>
+ </body>
 </html>
